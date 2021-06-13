@@ -33,7 +33,13 @@ function InputElement({ placeholder, func, reference, value }: T) {
         <InputRightElement
           children={
             <Text fontSize=".7em" mr="8">
-              {placeholder !== 'Quantity' ? 'USDT' : '(unit/s)'}
+              {placeholder === 'Quantity'
+                ? '(unit/s)'
+                : placeholder === 'Distance To Invalidation'
+                ? '%'
+                : placeholder === 'Distance To TP'
+                ? '%'
+                : 'USDT'}
             </Text>
           }
         />

@@ -19,13 +19,16 @@ export default function SelectElement({ func, value, reference }: T) {
     <>
       <Select
         onChange={async () => {
-          const selectedCoin = func(reference.current?.value);
+          const res = func(reference.current?.value);
+          const selectedCoin = res.coinPrice;
+          const clipboard = res.clipboard;
+
           try {
             if (Array.isArray(value)) {
-              const copyCoin = value.find(
+              const coinPrice = value.find(
                 ({ coin }) => coin === selectedCoin.coin
               )?.price;
-              copyCoin && navigator.clipboard.writeText(copyCoin);
+              coinPrice && clipboard(coinPrice);
             }
           } catch (e) {
             console.log(e);
