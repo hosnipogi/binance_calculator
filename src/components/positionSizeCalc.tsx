@@ -1,7 +1,16 @@
 import React, { useRef, useState } from 'react';
 import Field from '../fields/input';
-import { Box, Button, Stack, Text, HStack, Checkbox } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Stack,
+  Text,
+  HStack,
+  // Checkbox,
+  useRadioGroup,
+} from '@chakra-ui/react';
 import roundOff from '../utils/roundOff';
+import Radio from '../fields/radio';
 
 type T = {
   clipboardPrice: number | undefined;
@@ -121,6 +130,7 @@ const PositionSize = ({ clipboardPrice, pcMode }: T) => {
             roundOffLeverage={roundOffLeverage}
             leverageFactor={leverageFactor}
             setRoundOffLeverage={setRoundOffLeverage}
+            setLeverageFactor={setLeverageFactor}
           />
         )}
       </Stack>
@@ -132,6 +142,7 @@ const PositionSize = ({ clipboardPrice, pcMode }: T) => {
               roundOffLeverage={roundOffLeverage}
               leverageFactor={leverageFactor}
               setRoundOffLeverage={setRoundOffLeverage}
+              setLeverageFactor={setLeverageFactor}
             />
           )}
         </Box>
@@ -147,91 +158,131 @@ const InfoBox = ({
   roundOffLeverage,
   leverageFactor,
   setRoundOffLeverage,
+  setLeverageFactor,
 }: {
   pnl: { leveragedMultiplier: number; leveragedQty: number; pnl: any };
   roundOffLeverage: boolean;
   leverageFactor: number;
   setRoundOffLeverage: (bool: boolean) => void;
-}) => (
-  <Stack spacing="6" fontSize="sm">
-    <Box borderWidth="1px" borderRadius="lg" p="6">
-      <HStack justifyContent="space-between">
-        <Text>
-          Allowed Leverage:{' '}
-          {roundOffLeverage
-            ? pnl.leveragedMultiplier * leverageFactor
-            : roundOff(pnl.leveragedMultiplier, 2)}
-          X
+  setLeverageFactor: (num: number) => void;
+}) => {
+  const radioOptions = [
+    'Round Off leverage',
+    'Round Down leverage',
+    'No Roundoff',
+  ];
+  const { getRootProps, getRadioProps } = useRadioGroup({
+    name: 'roundLeverage',
+    defaultValue: 'Round Off leverage',
+    onChange: (lev) => {
+      switch (lev) {
+        case 'Round Off leverage':
+          setLeverageFactor(
+            Math.round(pnl.leveragedMultiplier) / pnl.leveragedMultiplier
+          );
+          setRoundOffLeverage(true);
+          break;
+        case 'Round Down leverage':
+          setLeverageFactor(
+            Math.floor(pnl.leveragedMultiplier) / pnl.leveragedMultiplier
+          );
+          setRoundOffLeverage(true);
+          break;
+        default:
+          setRoundOffLeverage(false);
+          break;
+      }
+    },
+  });
+
+  const group = getRootProps();
+
+  return (
+    <Stack spacing="6" fontSize="sm">
+      <Box borderWidth="1px" borderRadius="lg" p="6">
+        <HStack justifyContent="space-between" alignItems="start">
+          <Stack>
+            <Text>
+              Allowed Leverage:{' '}
+              {roundOffLeverage
+                ? roundOff(pnl.leveragedMultiplier * leverageFactor, 1)
+                : roundOff(pnl.leveragedMultiplier, 2)}
+              x
+            </Text>
+            <Text>
+              Quantity:{' '}
+              {roundOff(
+                roundOffLeverage
+                  ? pnl.leveragedQty * leverageFactor
+                  : pnl.leveragedQty,
+                5
+              )}
+            </Text>
+            <Text>
+              Gain:{' '}
+              {roundOff(
+                roundOffLeverage
+                  ? pnl.pnl.long.gain * leverageFactor
+                  : pnl.pnl.long.gain,
+                2
+              )}
+            </Text>
+            <Text>
+              Loss:{' '}
+              {roundOff(
+                roundOffLeverage
+                  ? pnl.pnl.long.loss * leverageFactor
+                  : pnl.pnl.long.loss,
+                2
+              )}
+            </Text>
+            <Text>
+              PNL:{' '}
+              {roundOff(
+                roundOffLeverage
+                  ? pnl.pnl.long.pnl * leverageFactor * 100
+                  : pnl.pnl.long.pnl * 100,
+                2
+              )}
+              %
+            </Text>
+            <Text>R/R: {roundOff(pnl.pnl.long.rr, 2)}</Text>
+          </Stack>
+          <Stack {...group}>
+            {radioOptions.map((value) => {
+              const r = getRadioProps({ value });
+              return (
+                <Radio key={value} {...r}>
+                  {value}
+                </Radio>
+              );
+            })}
+          </Stack>
+        </HStack>
+      </Box>
+      <Box borderWidth="1px" borderRadius="lg" p="6">
+        <Text mb="4" fontWeight="bold">
+          Long Position
         </Text>
-        <Checkbox
-          defaultChecked
-          size="sm"
-          onChange={() => setRoundOffLeverage(!roundOffLeverage)}
-        >
-          Round off Leverage
-        </Checkbox>
-      </HStack>
-      <Text>
-        Quantity:{' '}
-        {roundOff(
-          roundOffLeverage
-            ? pnl.leveragedQty * leverageFactor
-            : pnl.leveragedQty,
-          5
-        )}
-      </Text>
-      <Text>
-        Gain:{' '}
-        {roundOff(
-          roundOffLeverage
-            ? pnl.pnl.long.gain * leverageFactor
-            : pnl.pnl.long.gain,
-          2
-        )}
-      </Text>
-      <Text>
-        Loss:{' '}
-        {roundOff(
-          roundOffLeverage
-            ? pnl.pnl.long.loss * leverageFactor
-            : pnl.pnl.long.loss,
-          2
-        )}
-      </Text>
-      <Text>
-        PNL:{' '}
-        {roundOff(
-          roundOffLeverage
-            ? pnl.pnl.long.pnl * leverageFactor * 100
-            : pnl.pnl.long.pnl * 100,
-          2
-        )}
-        %
-      </Text>
-      <Text>R/R: {roundOff(pnl.pnl.long.rr, 2)}</Text>
-    </Box>
-    <Box borderWidth="1px" borderRadius="lg" p="6">
-      <Text mb="4" fontWeight="bold">
-        Long Position
-      </Text>
-      <Text>TP: {roundOff(pnl.pnl.long.TP, 5)}</Text>
-      <Text>SL: {roundOff(pnl.pnl.long.SL, 5)}</Text>
-      <Text>
-        Liquidation Price: {roundOff(pnl.pnl.long.liquidationPrice, 5)}
-      </Text>
-    </Box>
-    <Box borderWidth="1px" borderRadius="lg" p="6">
-      <Text mb="4" fontWeight="bold">
-        Short Position
-      </Text>
-      <Text>TP: {roundOff(pnl.pnl.long.liquidationPrice, 5)}</Text>
-      <Text>SL: {roundOff(pnl.pnl.long.liquidationPrice, 5)}</Text>
-      <Text>
-        Liquidation Price: {roundOff(pnl.pnl.long.liquidationPrice, 5)}
-      </Text>
-    </Box>
-  </Stack>
-);
+        <Text>TP: {roundOff(pnl.pnl.long.TP, 5)}</Text>
+        <Text>SL: {roundOff(pnl.pnl.long.SL, 5)}</Text>
+        <Text>
+          Liquidation Price: {roundOff(pnl.pnl.long.liquidationPrice, 5)}
+        </Text>
+      </Box>
+      <Box borderWidth="1px" borderRadius="lg" p="6">
+        <Text mb="4" fontWeight="bold">
+          Short Position
+        </Text>
+        <Text>TP: {roundOff(pnl.pnl.long.liquidationPrice, 5)}</Text>
+        <Text>SL: {roundOff(pnl.pnl.long.liquidationPrice, 5)}</Text>
+        <Text>
+          Liquidation Price: {roundOff(pnl.pnl.long.liquidationPrice, 5)}
+        </Text>
+      </Box>
+    </Stack>
+  );
+};
 
 function calculate({
   risk,

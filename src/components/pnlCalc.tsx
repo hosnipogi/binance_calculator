@@ -165,7 +165,6 @@ const PnlCalc = ({ clipboardPrice, pcMode }: T) => {
                   isLong,
                 });
 
-                console.log(result);
                 if (result.err) {
                   alert(JSON.stringify(result.err.message));
                   return;

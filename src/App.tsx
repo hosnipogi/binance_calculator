@@ -6,7 +6,6 @@ import PnlCalc from './components/pnlCalc';
 
 // CHAKRA UI
 import { Box, Container, Grid, Stack, useColorMode } from '@chakra-ui/react';
-// import ReactSelect from './fields/reactSelect';
 
 function App() {
   const [pcMode, setPcmode] = useState(false);
