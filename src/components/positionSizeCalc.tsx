@@ -274,10 +274,10 @@ const InfoBox = ({
         <Text mb="4" fontWeight="bold">
           Short Position
         </Text>
-        <Text>TP: {roundOff(pnl.pnl.long.liquidationPrice, 5)}</Text>
-        <Text>SL: {roundOff(pnl.pnl.long.liquidationPrice, 5)}</Text>
+        <Text>TP: {roundOff(pnl.pnl.short.TP, 5)}</Text>
+        <Text>SL: {roundOff(pnl.pnl.short.SL, 5)}</Text>
         <Text>
-          Liquidation Price: {roundOff(pnl.pnl.long.liquidationPrice, 5)}
+          Liquidation Price: {roundOff(pnl.pnl.short.liquidationPrice, 5)}
         </Text>
       </Box>
     </Stack>
